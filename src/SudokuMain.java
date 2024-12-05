@@ -10,10 +10,11 @@
 
 package Sudoku;
 
-import Sudoku.GameBoardPanel;
-
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.*;
+
 /**
  * The main Sudoku program
  */
