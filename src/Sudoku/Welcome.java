@@ -25,7 +25,7 @@ public class Welcome extends JFrame {
         // Title label (Sudoku)
         JLabel titleLabel = new JLabel("Welcome to Sudoku Game!", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
-        titleLabel.setForeground(new Color(0, 102, 204)); // Bright blue for title (more visible)
+        titleLabel.setForeground(Color.PINK); // Bright blue for title (more visible)
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.CENTER;
