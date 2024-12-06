@@ -24,6 +24,8 @@ public class SudokuMain extends JFrame {
     // private variables
     GameBoardPanel board = new GameBoardPanel(this);
     JButton btnNewGame = new JButton("New Game");
+    JButton btnExit = new JButton("Exit");
+    JButton btnReset = new JButton("Reset Game");
     JLabel scoreLabel = new JLabel();
     JLabel timerLabel = new JLabel("Timer: 0 seconds");
 
@@ -45,6 +47,8 @@ public class SudokuMain extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(timerLabel);
         buttonPanel.add(scoreLabel);
+        buttonPanel.add(btnReset);
+        buttonPanel.add(btnExit);
         cp.add(buttonPanel, BorderLayout.SOUTH);
 
         //set initial text for scoreLabel
@@ -56,6 +60,34 @@ public class SudokuMain extends JFrame {
         board.newGame();
         totalScore = 0;
         startTimer();
+
+        // Action listener for New Game button
+        btnNewGame.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                board.newGame();  // Restart the game
+                totalScore = 0;  // Reset the score
+                updateScoreLabel();
+            }
+        });
+
+        // Action listener for Reset Game button
+        btnReset.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                board.newGame();  // **RESET GAME: Mengulang permainan dari awal**
+                totalScore = 0;  // **RESET SCORE: Mengatur ulang skor**
+                updateScoreLabel();
+            }
+        });
+
+        // Action listener for Exit button
+        btnExit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);  // **EXIT: Menutup aplikasi**
+            }
+        });
 
         pack();     // Pack the UI components, instead of using setSize()
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
