@@ -56,7 +56,7 @@ public class Cell extends JTextField{
         super.setFont(FONT_NUMBERS);
 
         // Tambahkan filter untuk membatasi input hanya angka
-        ((AbstractDocument) this.getDocument()).setDocumentFilter(new DigitOnlyFilter());
+
     }
 
     public Cell(int row, int col, int value){
@@ -69,7 +69,7 @@ public class Cell extends JTextField{
         super.setFont(FONT_NUMBERS);
 
         // Tambahkan filter untuk membatasi input hanya angka
-        ((AbstractDocument) this.getDocument()).setDocumentFilter(new DigitOnlyFilter());
+
     }
 
     /** Reset this cell for a new game, given the puzzle number and isGiven */
@@ -105,26 +105,7 @@ public class Cell extends JTextField{
     /**
      * Inner class to filter input and allow only numeric values (0-9).
      */
-    private static class DigitOnlyFilter extends DocumentFilter {
-        @Override
-        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-            if (string.matches("\\d")) { // Hanya angka 0-9
-                super.insertString(fb, offset, string, attr);
-            }
-        }
 
-        @Override
-        public void replace(FilterBypass fb, int offset, int length, String string, AttributeSet attr) throws BadLocationException {
-            if (string.matches("\\d")) { // Hanya angka 0-9
-                super.replace(fb, offset, length, string, attr);
-            }
-        }
-
-        @Override
-        public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-            super.remove(fb, offset, length); // Izinkan penghapusan teks
-        }
-    }
     public void updateScore(int points){
         this.score += points;
     }
