@@ -15,6 +15,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
+import static Sudoku.Cell.BG_TO_GUESS;
+
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
 
@@ -133,6 +135,9 @@ public class GameBoardPanel extends JPanel {
             }
             sourceCell.paint();   // Perbarui tampilan cell
 
+            // [New Feature: Highlight same guesses]
+            highlightSameValueCells(numberIn);
+
             /*
              * [TODO 6] (later)
              * Check if the player has solved the puzzle after this move,
@@ -175,5 +180,68 @@ public class GameBoardPanel extends JPanel {
     }
     private void updateScore(){
         score.setText("Your Score Now: " + totalScore);
+    }
+
+    private void highlightSameValueCells(int numberIn) {
+        boolean conflictFound = false;
+
+        // Clear previous highlights
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
+                cells[row][col].setBackground(cells[row][col].status == CellStatus.GIVEN ? Cell.BG_GIVEN : BG_TO_GUESS);
+                cells[row][col].setForeground(Cell.FG_NOT_GIVEN);
+            }
+        }
+
+        // Search for cells with the same value and highlight them
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
+                if (cells[row][col].getText().equals(String.valueOf(numberIn))) {
+                    cells[row][col].setBackground(BG_TO_GUESS); // Highlight the same value
+                    cells[row][col].setForeground(Cell.FG_NOT_GIVEN);
+
+                    // Check for conflicts in the row and column
+                    if (isConflict(row, col)) {
+                        conflictFound = true;
+                        cells[row][col].setBackground(new Color(255, 0, 0)); // Red background for conflicts
+                    }
+                }
+            }
+        }
+
+        if (conflictFound) {
+            JOptionPane.showMessageDialog(null, "Conflict detected! Some cells have the same value in the same row, column, or subgrid.");
+        }
+    }
+
+    private boolean isConflict(int row, int col) {
+        int value = Integer.parseInt(cells[row][col].getText());
+
+        // Check if there is any conflict in the row
+        for (int i = 0; i < SudokuConstants.GRID_SIZE; i++) {
+            if (i != col && cells[row][i].getText().equals(String.valueOf(value))) {
+                return true;
+            }
+        }
+
+        // Check if there is any conflict in the column
+        for (int i = 0; i < SudokuConstants.GRID_SIZE; i++) {
+            if (i != row && cells[i][col].getText().equals(String.valueOf(value))) {
+                return true;
+            }
+        }
+
+        // Check if there is any conflict in the subgrid
+        int startRow = row - row % SudokuConstants.SUBGRID_SIZE;
+        int startCol = col - col % SudokuConstants.SUBGRID_SIZE;
+        for (int i = startRow; i < startRow + SudokuConstants.SUBGRID_SIZE; i++) {
+            for (int j = startCol; j < startCol + SudokuConstants.SUBGRID_SIZE; j++) {
+                if (i != row && j != col && cells[i][j].getText().equals(String.valueOf(value))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
