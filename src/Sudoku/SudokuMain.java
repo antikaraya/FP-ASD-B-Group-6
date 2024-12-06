@@ -14,6 +14,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.Scanner;
 
 /**
  * The main Sudoku program
@@ -28,15 +29,23 @@ public class SudokuMain extends JFrame {
     JButton btnReset = new JButton("Reset Game");
     JLabel scoreLabel = new JLabel();
     JLabel timerLabel = new JLabel("Timer: 0 seconds");
+    String name;
 
-
-    //declare variable
+    // Declare variable
     private Timer timer;
     private int seconds;
     private int totalScore;
 
+    JComboBox<String> levelBox;
+
     // Constructor
     public SudokuMain() {
+        // User choose level and enter their name
+        String[] level = {"Easy", "Intermediate", "Difficult"};
+        levelBox = new JComboBox<>(level);
+        name = JOptionPane.showInputDialog(this, "Your Name: ");
+        JOptionPane.showMessageDialog(this, levelBox, "Choose Level ", JOptionPane.QUESTION_MESSAGE);
+
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
 

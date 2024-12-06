@@ -13,7 +13,7 @@ package Sudoku;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.LineBorder;
+import javax.swing.border.LineBorder; // ini belum kepake nih
 
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
