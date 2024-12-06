@@ -1,7 +1,5 @@
 package Sudoku;
 
-import Sudoku.SudokuConstants;
-
 public class Puzzle {
     // All variables have package access
     // The numbers on the puzzle
