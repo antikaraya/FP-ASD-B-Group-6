@@ -40,6 +40,9 @@ public class SudokuMain extends JFrame {
 
     // Constructor
     public SudokuMain() {
+        // Menambahkan halaman Selamat Datang sebelum bermain
+//        welcomeScreen();
+
         // User choose level and enter their name
         name = JOptionPane.showInputDialog(this, "Your Name");
         String[] level = {"Easy", "Intermediate", "Difficult"};
