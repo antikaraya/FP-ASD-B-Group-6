@@ -184,7 +184,4 @@ public class Puzzle{
         }
         return true;
     }
-
-    public void newPuzzle(int levelNum, int toGivenCells) {
-    }
 }
