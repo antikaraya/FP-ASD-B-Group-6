@@ -14,6 +14,9 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException;
 
 
 /**
@@ -38,6 +41,7 @@ public class SudokuMain extends JFrame {
 
     JComboBox<String> levelBox;
     int filledCells; // Menyimpan jumlah puzzle berdasarkan level yang diinginkan.
+    private Clip musicClip;
 
     // Constructor
     public SudokuMain() {
@@ -107,14 +111,41 @@ public class SudokuMain extends JFrame {
         btnExit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                stopBGM();
                 System.exit(0);  // **EXIT: Menutup aplikasi**
             }
         });
+
+        playBGM("src/backgroundMusic.wav");
 
         pack();     // Pack the UI components, instead of using setSize()
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
         setTitle("Sudoku");
         setVisible(true);
+    }
+
+    public void playBGM(String soundFile) {
+        try {
+            File audioFile = new File(soundFile);
+            if (!audioFile.exists()) {
+                System.err.println("Audio file not found: " + soundFile);
+                return;
+            }
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            musicClip = AudioSystem.getClip();
+            musicClip.open(audioStream);
+            musicClip.loop(Clip.LOOP_CONTINUOUSLY); // Mainkan secara terus-menerus
+            musicClip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stopBGM() {
+        if (musicClip != null && musicClip.isRunning()) {
+            musicClip.stop();
+            musicClip.close();
+        }
     }
 
     private void initializeTimer(){
