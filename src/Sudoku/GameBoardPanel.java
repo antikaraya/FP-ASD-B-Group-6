@@ -33,9 +33,12 @@ public class GameBoardPanel extends JPanel {
     private JLabel score = new JLabel("Your Score Now: 0");
     private int totalScore;
     private SudokuMain mainFrame;
+    private int filledCells;
+
     /** Constructor */
-    public GameBoardPanel(SudokuMain mainFrame) {
+    public GameBoardPanel(SudokuMain mainFrame, int filledCells) {
         this.mainFrame = mainFrame;
+        this.filledCells = filledCells;
         super.setLayout(new GridLayout(SudokuConstants.GRID_SIZE, SudokuConstants.GRID_SIZE));  // JPanel
 
         // Allocate the 2D array of Cell, and added into JPanel.
@@ -66,9 +69,9 @@ public class GameBoardPanel extends JPanel {
      * Generate a new puzzle; and reset the game board of cells based on the puzzle.
      * You can call this method to start a new game.
      */
+
     public void newGame() {
-        // Generate a new puzzle
-        puzzle.newPuzzle(65); //MAU TERISI BERAPA DULU??
+        puzzle.newPuzzle(filledCells);
         totalScore = 0;
         updateScore();
 

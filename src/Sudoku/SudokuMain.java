@@ -2,7 +2,7 @@
  * ES234317-Algorithm and Data Structures
  * Semester Ganjil, 2024/2025
  * Group Capstone Project
- * Group #1 
+ * Group #1
  * 1 - 5026231033 - Ayu Alfia Putri
  * 2 - 5026231034 - Antika Raya
  * 3 - 5026231106 - Nailah Qonitah Firdausa
@@ -14,7 +14,6 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.util.Scanner;
 
 /**
  * The main Sudoku program
@@ -23,7 +22,7 @@ public class SudokuMain extends JFrame {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
 
     // private variables
-    GameBoardPanel board = new GameBoardPanel(this);
+    GameBoardPanel board;
     JButton btnNewGame = new JButton("New Game");
     JButton btnExit = new JButton("Exit");
     JButton btnReset = new JButton("Reset Game");
@@ -37,14 +36,27 @@ public class SudokuMain extends JFrame {
     private int totalScore;
 
     JComboBox<String> levelBox;
+    int filledCells; // Menyimpan jumlah puzzle berdasarkan level yang diinginkan.
 
     // Constructor
     public SudokuMain() {
         // User choose level and enter their name
+        name = JOptionPane.showInputDialog(this, "Your Name");
         String[] level = {"Easy", "Intermediate", "Difficult"};
         levelBox = new JComboBox<>(level);
-        name = JOptionPane.showInputDialog(this, "Your Name: ");
-        JOptionPane.showMessageDialog(this, levelBox, "Choose Level ", JOptionPane.QUESTION_MESSAGE);
+        JOptionPane.showMessageDialog(this, levelBox, "Choose Level", JOptionPane.QUESTION_MESSAGE);
+
+        // Set jumlah puzzle terisi berdasarkan level yang dipilih
+        String selectedLevel = (String) levelBox.getSelectedItem();
+        if ("Easy".equals(selectedLevel)) {
+            filledCells = 65;
+        } else if ("Intermediate".equals(selectedLevel)) {
+            filledCells = 45;
+        } else if ("Difficult".equals(selectedLevel)) {
+            filledCells = 30;
+        }
+
+        board = new GameBoardPanel(this, filledCells);
 
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
@@ -62,7 +74,7 @@ public class SudokuMain extends JFrame {
 
         //set initial text for scoreLabel
         totalScore = 0; // Initialize score
-        scoreLabel.setText("Your Score Now: " + totalScore);
+        scoreLabel.setText("Score: " + totalScore);
 
         // Initialize the game board and timer
         initializeTimer();
@@ -84,8 +96,8 @@ public class SudokuMain extends JFrame {
         btnReset.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                board.newGame();  // **RESET GAME: Mengulang permainan dari awal**
-                totalScore = 0;  // **RESET SCORE: Mengatur ulang skor**
+                board.newGame();  // RESET GAME: Mengulang permainan dari awal
+                totalScore = 0;  // RESET SCORE: Mengatur ulang skor
                 updateScoreLabel();
             }
         });
@@ -103,6 +115,7 @@ public class SudokuMain extends JFrame {
         setTitle("Sudoku");
         setVisible(true);
     }
+
     private void initializeTimer(){
         seconds = 0;
         timer = new Timer(1000, new ActionListener(){
@@ -112,6 +125,7 @@ public class SudokuMain extends JFrame {
             }
         });
     }
+
     // Method to start the timer
     private void startTimer(){
         timer.start();
