@@ -1,13 +1,24 @@
+/**
+ * ES234317-Algorithm and Data Structures
+ * Semester Ganjil, 2024/2025
+ * Group Capstone Project
+ * Group #1
+ * 1 - 5026231033 - Ayu Alfia Putri
+ * 2 - 5026231034 - Antika Raya
+ * 3 - 5026231106 - Nailah Qonitah Firdausa
+ */
+
 package Sudoku;
 
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JTextField;
+
 /**
  * The Cell class model the cells of the Sudoku puzzle, by customizing (subclass)
  * the javax.swing.JTextField to include row/column, puzzle number and status.
  */
-public class Cell extends JTextField {
+public class Cell extends JTextField{
     private static final long serialVersionUID = 1L;  // to prevent serial warning
 
     // Define named constants for JTextField's colors and fonts
@@ -27,42 +38,61 @@ public class Cell extends JTextField {
     int number;
     /** The status of this cell defined in enum CellStatus */
     CellStatus status;
+    boolean islocked; // INI BUAT APAA KOCAK
+    int score;
 
     /** Constructor */
-    public Cell(int row, int col) {
+    public Cell(int row, int col){
         super();   // JTextField
         this.row = row;
         this.col = col;
+        //setDocument(new LimitInputCell(1));
         // Inherited from JTextField: Beautify all the cells once for all
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
     }
 
+    public Cell(int row, int col, int value){
+        super(); //JTextField
+        this.row = row;
+        this.col = col;
+        this.number = value;
+        //setDocument(new LimitInputCell(1));//Make cell has a limit length input
+        super.setHorizontalAlignment(JTextField.CENTER);
+        super.setFont(FONT_NUMBERS);
+    }
+
     /** Reset this cell for a new game, given the puzzle number and isGiven */
-    public void newGame(int number, boolean isGiven) {
+    public void newGame(int number, boolean isGiven){
         this.number = number;
+        this.score = 0; //Inisialisasi skor
         status = isGiven ? CellStatus.GIVEN : CellStatus.TO_GUESS;
         paint();    // paint itself
     }
 
     /** This Cell (JTextField) paints itself based on its status */
-    public void paint() {
-        if (status == CellStatus.GIVEN) {
+    public void paint(){
+        if (status == CellStatus.GIVEN){
             // Inherited from JTextField: Set display properties
             super.setText(number + "");
             super.setEditable(false);
             super.setBackground(BG_GIVEN);
             super.setForeground(FG_GIVEN);
-        } else if (status == CellStatus.TO_GUESS) {
+        } else if (status == CellStatus.TO_GUESS){
             // Inherited from JTextField: Set display properties
             super.setText("");
             super.setEditable(true);
             super.setBackground(BG_TO_GUESS);
             super.setForeground(FG_NOT_GIVEN);
-        } else if (status == CellStatus.CORRECT_GUESS) {  // from TO_GUESS
+        } else if (status == CellStatus.CORRECT_GUESS){  // from TO_GUESS
             super.setBackground(BG_CORRECT_GUESS);
-        } else if (status == CellStatus.WRONG_GUESS) {    // from TO_GUESS
+            updateScore(5);
+        } else if (status == CellStatus.WRONG_GUESS){    // from TO_GUESS
             super.setBackground(BG_WRONG_GUESS);
         }
+    }
+
+    public void updateScore(int points){
+        this.score += points;
     }
 }

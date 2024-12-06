@@ -1,8 +1,19 @@
+/**
+ * ES234317-Algorithm and Data Structures
+ * Semester Ganjil, 2024/2025
+ * Group Capstone Project
+ * Group #1
+ * 1 - 5026231033 - Ayu Alfia Putri
+ * 2 - 5026231034 - Antika Raya
+ * 3 - 5026231106 - Nailah Qonitah Firdausa
+ */
+
 package Sudoku;
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
@@ -18,9 +29,13 @@ public class GameBoardPanel extends JPanel {
     private Cell[][] cells = new Cell[SudokuConstants.GRID_SIZE][SudokuConstants.GRID_SIZE];
     /** It also contains a Puzzle with array numbers and isGiven */
     private Puzzle puzzle = new Puzzle();
-
+    private JPanel grid = new JPanel();
+    private JLabel score = new JLabel("Your Score Now: 0");
+    private int totalScore;
+    private SudokuMain mainFrame;
     /** Constructor */
-    public GameBoardPanel() {
+    public GameBoardPanel(SudokuMain mainFrame) {
+        this.mainFrame = mainFrame;
         super.setLayout(new GridLayout(SudokuConstants.GRID_SIZE, SudokuConstants.GRID_SIZE));  // JPanel
 
         // Allocate the 2D array of Cell, and added into JPanel.
@@ -53,7 +68,9 @@ public class GameBoardPanel extends JPanel {
      */
     public void newGame() {
         // Generate a new puzzle
-        puzzle.newPuzzle(2);
+        puzzle.newPuzzle(65); //MAU TERISI BERAPA DULU??
+        totalScore = 0;
+        updateScore();
 
         // Initialize all the 9x9 cells, based on the puzzle.
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
@@ -84,7 +101,6 @@ public class GameBoardPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             // Get a reference of the JTextField that triggers this action event
             Cell sourceCell = (Cell)e.getSource();
-
             // Retrieve the int entered
             int numberIn = Integer.parseInt(sourceCell.getText());
             // For debugging
@@ -98,10 +114,11 @@ public class GameBoardPanel extends JPanel {
              */
             if (numberIn == sourceCell.number) {
                 sourceCell.status = CellStatus.CORRECT_GUESS;
+                totalScore += 5; //Tambah skor jika jawaban benar
             } else {
                 sourceCell.status = CellStatus.WRONG_GUESS;
             }
-            sourceCell.paint();   // re-paint this cell based on its status
+            sourceCell.paint();   // Perbarui tampilan cell
 
             /*
              * [TODO 6] (later)
@@ -109,8 +126,16 @@ public class GameBoardPanel extends JPanel {
              *   by calling isSolved(). Put up a congratulation JOptionPane, if so.
              */
             if (isSolved()){
-                JOptionPane.showMessageDialog(null, "Congratulation");
+                JOptionPane.showMessageDialog(null, "Congratulation! Your Total Score is " + totalScore);
             }
+            updateScore();
+            mainFrame.updateScoreLabel();
         }
+    }
+    public int getTotalScore() {
+        return totalScore;
+    }
+    private void updateScore(){
+        score.setText("Your Score Now: " + totalScore);
     }
 }
