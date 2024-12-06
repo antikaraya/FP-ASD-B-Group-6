@@ -13,10 +13,6 @@ package Sudoku;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JTextField;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter;
 
 /**
  * The Cell class model the cells of the Sudoku puzzle, by customizing (subclass)
@@ -30,10 +26,10 @@ public class Cell extends JTextField{
     public static final Color BG_GIVEN = new Color(240, 240, 240); // RGB
     public static final Color FG_GIVEN = Color.BLACK;
     public static final Color FG_NOT_GIVEN = Color.GRAY;
-    public static final Color BG_TO_GUESS  = Color.PINK;
+    public static final Color BG_TO_GUESS  = Color.YELLOW;
     public static final Color BG_CORRECT_GUESS = new Color(0, 216, 0);
     public static final Color BG_WRONG_GUESS   = new Color(216, 0, 0);
-    public static final Font FONT_NUMBERS = new Font("OCR A Extended", Font.BOLD, 28);
+    public static final Font FONT_NUMBERS = new Font("OCR A Extended", Font.PLAIN, 28);
 
     // Define properties (package-visible)
     /** The row and column number [0-8] of this cell */
@@ -54,9 +50,6 @@ public class Cell extends JTextField{
         // Inherited from JTextField: Beautify all the cells once for all
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
-
-        // Tambahkan filter untuk membatasi input hanya angka
-        ((AbstractDocument) this.getDocument()).setDocumentFilter(new DigitOnlyFilter());
     }
 
     public Cell(int row, int col, int value){
@@ -67,9 +60,6 @@ public class Cell extends JTextField{
         //setDocument(new LimitInputCell(1));//Make cell has a limit length input
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
-
-        // Tambahkan filter untuk membatasi input hanya angka
-        ((AbstractDocument) this.getDocument()).setDocumentFilter(new DigitOnlyFilter());
     }
 
     /** Reset this cell for a new game, given the puzzle number and isGiven */
@@ -101,30 +91,8 @@ public class Cell extends JTextField{
             super.setBackground(BG_WRONG_GUESS);
         }
     }
+
     public void updateScore(int points){
         this.score += points;
-    }
-    /**
-     * Inner class to filter input and allow only numeric values (0-9).
-     */
-    private static class DigitOnlyFilter extends DocumentFilter {
-        @Override
-        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-            if (string.matches("\\d")) { // Hanya angka 0-9
-                super.insertString(fb, offset, string, attr);
-            }
-        }
-
-        @Override
-        public void replace(FilterBypass fb, int offset, int length, String string, AttributeSet attr) throws BadLocationException {
-            if (string.matches("\\d")) { // Hanya angka 0-9
-                super.replace(fb, offset, length, string, attr);
-            }
-        }
-
-        @Override
-        public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-            super.remove(fb, offset, length); // Izinkan penghapusan teks
-        }
     }
 }
