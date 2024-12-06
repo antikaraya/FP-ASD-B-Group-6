@@ -125,13 +125,27 @@ public class GameBoardPanel extends JPanel {
              * Update the cell status sourceCell.status,
              * and re-paint the cell via sourceCell.paint().
              */
-            if (numberIn == sourceCell.number) {
-                sourceCell.status = CellStatus.CORRECT_GUESS;
-                totalScore += 5; //Tambah skor jika jawaban benar
+            // Validate the input
+            if (isConflict(sourceCell, numberIn)) {
+                sourceCell.setBackground(Color.RED); // Highlight conflicting cell
+                Timer timer = new Timer(1000, new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        sourceCell.paint(); // Reset the color back
+                    }
+                });
+                timer.setRepeats(false);
+                timer.start(); // Revert the color after 1 second
+                showConflictWarning(); // Show conflict warning
             } else {
-                sourceCell.status = CellStatus.WRONG_GUESS;
+                // No conflict, check if correct
+                if (numberIn == sourceCell.number) {
+                    sourceCell.status = CellStatus.CORRECT_GUESS;
+                    totalScore += 5; // Add score if the guess is correct
+                } else {
+                    sourceCell.status = CellStatus.WRONG_GUESS;
+                }
+                sourceCell.paint(); // Update the cell display
             }
-            sourceCell.paint();   // Perbarui tampilan cell
 
             /*
              * [TODO 6] (later)
@@ -175,5 +189,40 @@ public class GameBoardPanel extends JPanel {
     }
     private void updateScore(){
         score.setText("Your Score Now: " + totalScore);
+    }
+
+    private boolean isConflict(Cell sourceCell, int numberIn) {
+        // Check if the number already exists in the same row, column, or sub-grid
+        // Check row
+        for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
+            if (cells[sourceCell.row][col].number == numberIn) {
+                return true; // Conflict in the same row
+            }
+        }
+
+        // Check column
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
+            if (cells[row][sourceCell.col].number == numberIn) {
+                return true; // Conflict in the same column
+            }
+        }
+
+        // Check sub-grid (3x3 grid)
+        int subGridRow = (sourceCell.row / 3) * 3;
+        int subGridCol = (sourceCell.col / 3) * 3;
+        for (int r = subGridRow; r < subGridRow + 3; r++) {
+            for (int c = subGridCol; c < subGridCol + 3; c++) {
+                if (cells[r][c].number == numberIn) {
+                    return true; // Conflict in the sub-grid
+                }
+            }
+        }
+
+        return false; // No conflict
+    }
+
+    private void showConflictWarning() {
+        JOptionPane.showMessageDialog(null, "This number conflicts with another number in the puzzle.",
+                "Conflict Detected", JOptionPane.WARNING_MESSAGE);
     }
 }
