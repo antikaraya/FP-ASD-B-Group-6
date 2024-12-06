@@ -13,9 +13,7 @@ package Sudoku;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.LineBorder;
-
-import static Sudoku.Cell.BG_TO_GUESS;
+import javax.swing.border.LineBorder; // ini belum kepake nih
 
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
@@ -47,17 +45,7 @@ public class GameBoardPanel extends JPanel {
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
             for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
                 cells[row][col] = new Cell(row, col);
-
-                // Tentukan ketebalan garis berdasarkan posisi sel
-                int top = (row % 3 == 0) ? 3 : 1;    // Garis tebal di atas subgrid
-                int left = (col % 3 == 0) ? 3 : 1;   // Garis tebal di kiri subgrid
-                int bottom = (row == SudokuConstants.GRID_SIZE - 1) ? 3 : 1;  // Garis tebal bawah
-                int right = (col == SudokuConstants.GRID_SIZE - 1) ? 3 : 1;   // Garis tebal kanan
-
-                // Tambahkan border dengan ketebalan sesuai posisi
-                cells[row][col].setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, Color.BLACK));
-
-                super.add(cells[row][col]);   // Tambahkan ke JPanel
+                super.add(cells[row][col]);   // JPanel
             }
         }
 
@@ -135,9 +123,6 @@ public class GameBoardPanel extends JPanel {
             }
             sourceCell.paint();   // Perbarui tampilan cell
 
-            // [New Feature: Highlight same guesses]
-            highlightSameValueCells(numberIn);
-
             /*
              * [TODO 6] (later)
              * Check if the player has solved the puzzle after this move,
@@ -150,98 +135,10 @@ public class GameBoardPanel extends JPanel {
             mainFrame.updateScoreLabel();
         }
     }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-
-        // Set warna garis
-        g2d.setColor(Color.BLACK);
-
-        // Ukuran grid
-        int gridSize = SudokuConstants.GRID_SIZE; // 9
-        int cellSize = CELL_SIZE; // 60 (sudah didefinisikan)
-
-        // Menggambar garis horizontal dan vertikal
-        for (int i = 0; i <= gridSize; i++) {
-            // Garis vertikal
-            g2d.setStroke(i % 3 == 0 ? new BasicStroke(3) : new BasicStroke(1)); // Tebal di setiap 3 kolom
-            g2d.drawLine(i * cellSize, 0, i * cellSize, gridSize * cellSize);
-
-            // Garis horizontal
-            g2d.setStroke(i % 3 == 0 ? new BasicStroke(3) : new BasicStroke(1)); // Tebal di setiap 3 baris
-            g2d.drawLine(0, i * cellSize, gridSize * cellSize, i * cellSize);
-        }
-    }
-
     public int getTotalScore() {
         return totalScore;
     }
     private void updateScore(){
         score.setText("Your Score Now: " + totalScore);
-    }
-
-    private void highlightSameValueCells(int numberIn) {
-        boolean conflictFound = false;
-
-        // Clear previous highlights
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
-                cells[row][col].setBackground(cells[row][col].status == CellStatus.GIVEN ? Cell.BG_GIVEN : BG_TO_GUESS);
-                cells[row][col].setForeground(Cell.FG_NOT_GIVEN);
-            }
-        }
-
-        // Search for cells with the same value and highlight them
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
-                if (cells[row][col].getText().equals(String.valueOf(numberIn))) {
-                    cells[row][col].setBackground(BG_TO_GUESS); // Highlight the same value
-                    cells[row][col].setForeground(Cell.FG_NOT_GIVEN);
-
-                    // Check for conflicts in the row and column
-                    if (isConflict(row, col)) {
-                        conflictFound = true;
-                        cells[row][col].setBackground(new Color(255, 0, 0)); // Red background for conflicts
-                    }
-                }
-            }
-        }
-
-        if (conflictFound) {
-            JOptionPane.showMessageDialog(null, "Conflict detected! Some cells have the same value in the same row, column, or subgrid.");
-        }
-    }
-
-    private boolean isConflict(int row, int col) {
-        int value = Integer.parseInt(cells[row][col].getText());
-
-        // Check if there is any conflict in the row
-        for (int i = 0; i < SudokuConstants.GRID_SIZE; i++) {
-            if (i != col && cells[row][i].getText().equals(String.valueOf(value))) {
-                return true;
-            }
-        }
-
-        // Check if there is any conflict in the column
-        for (int i = 0; i < SudokuConstants.GRID_SIZE; i++) {
-            if (i != row && cells[i][col].getText().equals(String.valueOf(value))) {
-                return true;
-            }
-        }
-
-        // Check if there is any conflict in the subgrid
-        int startRow = row - row % SudokuConstants.SUBGRID_SIZE;
-        int startCol = col - col % SudokuConstants.SUBGRID_SIZE;
-        for (int i = startRow; i < startRow + SudokuConstants.SUBGRID_SIZE; i++) {
-            for (int j = startCol; j < startCol + SudokuConstants.SUBGRID_SIZE; j++) {
-                if (i != row && j != col && cells[i][j].getText().equals(String.valueOf(value))) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 }
