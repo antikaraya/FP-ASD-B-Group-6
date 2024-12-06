@@ -41,7 +41,6 @@ public class Cell extends JTextField{
     CellStatus status;
     boolean islocked; // INI BUAT APAA KOCAK
     int score;
-    private SoundManager soundManager;
 
     /** Constructor */
     public Cell(int row, int col){
@@ -52,7 +51,6 @@ public class Cell extends JTextField{
         // Inherited from JTextField: Beautify all the cells once for all
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
-        soundManager = new SoundManager();
     }
 
     public Cell(int row, int col, int value){
@@ -90,25 +88,13 @@ public class Cell extends JTextField{
         } else if (status == CellStatus.CORRECT_GUESS){  // from TO_GUESS
             super.setBackground(BG_CORRECT_GUESS);
             updateScore(5);
-            soundManager.playCorrectSound(); // main suara
         } else if (status == CellStatus.WRONG_GUESS){    // from TO_GUESS
             super.setBackground(BG_WRONG_GUESS);
-            soundManager.playWrongSound();  // Mainkan suara salah
         }
     }
 
     public void updateScore(int points){
         this.score += points;
-    }
-
-    // Memulai backsound
-    public void startBackSound() {
-        soundManager.startBackSound();
-    }
-
-    // Menghentikan backsound
-    public void stopBackSound() {
-        soundManager.stopBackSound();
     }
 
 }
