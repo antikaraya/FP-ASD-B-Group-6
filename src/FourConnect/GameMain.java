@@ -20,6 +20,7 @@ public class GameMain extends JPanel {
     public static final String TITLE = "Connect-Four";
     public static final Color COLOR_BG = Color.WHITE;
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
+    public static final int STATUS_BAR_HEIGHT = 30;
 
     private Board board;
     private State currentState;
@@ -31,29 +32,35 @@ public class GameMain extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int mouseX = e.getX();
-                int mouseY = e.getY();
-                int row = mouseY / Cell.SIZE;
                 int col = mouseX / Cell.SIZE;
 
-                if (currentState == State.PLAYING) {
-                    if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
-                            && board.cells[row][col].content == Seed.NO_SEED) {
-                        // Update game state
+                if (col >= 0 && col < Board.COLS) {
+                    // Cari row terendah yang tersedia di kolom tersebut
+                    int row = -1;
+                    for (int r = Board.ROWS - 1; r >= 0; r--) {
+                        if (board.cells[r][col].content == Seed.NO_SEED) {
+                            row = r;
+                            break;
+                        }
+                    }
+
+                    if (row != -1 && currentState == State.PLAYING) {
                         currentState = board.stepGame(currentPlayer, row, col);
 
-                        // Play appropriate sound clip
+                        // Mainkan efek suara jika tersedia
                         if (currentPlayer == Seed.CROSS) {
-                            SoundEffect.PLAYER1.play();
+                            if (SoundEffect.PLAYER1 != null) SoundEffect.PLAYER1.play();
                         } else {
-                            SoundEffect.PLAYER2.play();
+                            if (SoundEffect.PLAYER2 != null) SoundEffect.PLAYER2.play();
                         }
 
+                        // Perbarui status
                         if (currentState == State.PLAYING) {
                             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                         } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
-                            SoundEffect.EXPLOSION.play();
+                            if (SoundEffect.EXPLOSION != null) SoundEffect.EXPLOSION.play();
                         } else if (currentState == State.DRAW) {
-                            SoundEffect.GAME_OVER.play();
+                            if (SoundEffect.GAME_OVER != null) SoundEffect.GAME_OVER.play();
                         }
                     }
                 } else {
@@ -67,7 +74,7 @@ public class GameMain extends JPanel {
         statusBar.setFont(FONT_STATUS);
         super.setLayout(new BorderLayout());
         super.add(statusBar, BorderLayout.PAGE_END);
-        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
+        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + STATUS_BAR_HEIGHT));
 
         initGame();
         newGame();
@@ -81,6 +88,8 @@ public class GameMain extends JPanel {
         board.initGame();
         currentPlayer = Seed.CROSS;
         currentState = State.PLAYING;
+        statusBar.setText("Player 1's Turn");
+        System.out.println("Game restarted!");
     }
 
     @Override
@@ -88,6 +97,17 @@ public class GameMain extends JPanel {
         super.paintComponent(g);
         setBackground(COLOR_BG);
         board.paint(g, Cell.SIZE);
+
+        // Draw grid lines to enhance visibility
+        g.setColor(Color.BLACK);
+        for (int row = 1; row < Board.ROWS; row++) {
+            int y = row * Cell.SIZE;
+            g.drawLine(0, y, Board.CANVAS_WIDTH, y);
+        }
+        for (int col = 1; col < Board.COLS; col++) {
+            int x = col * Cell.SIZE;
+            g.drawLine(x, 0, x, Board.CANVAS_HEIGHT);
+        }
 
         if (currentState == State.PLAYING) {
             statusBar.setText((currentPlayer == Seed.CROSS ? "Player 1" : "Player 2") + "'s Turn");
@@ -102,10 +122,12 @@ public class GameMain extends JPanel {
 
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(() -> {
+            JFrame.setDefaultLookAndFeelDecorated(true);
             JFrame frame = new JFrame(TITLE);
             GameMain gamePanel = new GameMain();
             frame.setContentPane(gamePanel);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setResizable(false);
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
