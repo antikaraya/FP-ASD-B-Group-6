@@ -2,7 +2,7 @@
  * ES234317-Algorithm and Data Structures
  * Semester Ganjil, 2024/2025
  * Group Capstone Project
- * Group #6
+ * Group #1
  * 1 - 5026231033 - Ayu Alfia Putri
  * 2 - 5026231034 - Antika Raya
  * 3 - 5026231106 - Nailah Qonitah Firdausa

@@ -22,6 +22,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public enum SoundEffect {
     PLAYER1("Spongebob.wav"),
     PLAYER2("Patrick.wav"),
+    AI_PLAYER("Patrick.wav"),
     EXPLOSION("Twing.wav"),
     GAME_OVER("gameover.wav"),
     BACKSOUND("Backsound.wav");
