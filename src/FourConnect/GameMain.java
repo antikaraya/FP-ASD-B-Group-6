@@ -1,13 +1,3 @@
-/**
- * ES234317-Algorithm and Data Structures
- * Semester Ganjil, 2024/2025
- * Group Capstone Project
- * Group #6
- * 1 - 5026231033 - Ayu Alfia Putri
- * 2 - 5026231034 - Antika Raya
- * 3 - 5026231106 - Nailah Qonitah Firdausa
- */
-
 package FourConnect;
 
 import java.awt.*;
@@ -17,33 +7,33 @@ import javax.swing.*;
 public class GameMain extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    public static final String TITLE = "Connect-Four";
+    public static final String TITLE = "Connect Four";
     public static final Color COLOR_BG = Color.WHITE;
+    public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
+    public static final Color COLOR_PLAYER1 = new Color(239, 105, 80);  // Red #EF6950
+    public static final Color COLOR_PLAYER2 = new Color(64, 154, 225); // Blue #409AE1
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
-    public static final int STATUS_BAR_HEIGHT = 30;
 
     private Board board;
     private State currentState;
     private Seed currentPlayer;
     private JLabel statusBar;
 
-    // Player names
     private String playerName1;
     private String playerName2;
 
     public GameMain() {
-        // Input player's name
+        // Input player names
         playerName1 = JOptionPane.showInputDialog("Enter player name 1:");
         playerName2 = JOptionPane.showInputDialog("Enter player name 2:");
         if (playerName1 == null || playerName1.trim().isEmpty()) {
             playerName1 = "Player 1";
         }
-
         if (playerName2 == null || playerName2.trim().isEmpty()) {
             playerName2 = "Player 2";
         }
 
-        // Start background music
+        // Start background music (if applicable)
         SoundEffect.BACKSOUND.loop();
 
         super.addMouseListener(new MouseAdapter() {
@@ -53,7 +43,6 @@ public class GameMain extends JPanel {
                 int col = mouseX / Cell.SIZE;
 
                 if (col >= 0 && col < Board.COLS) {
-                    // Cari row terendah yang tersedia di kolom tersebut
                     int row = -1;
                     for (int r = Board.ROWS - 1; r >= 0; r--) {
                         if (board.cells[r][col].content == Seed.NO_SEED) {
@@ -65,14 +54,14 @@ public class GameMain extends JPanel {
                     if (row != -1 && currentState == State.PLAYING) {
                         currentState = board.stepGame(currentPlayer, row, col);
 
-                        // Mainkan efek suara jika tersedia
+                        // Play sound effects based on player
                         if (currentPlayer == Seed.CROSS) {
                             if (SoundEffect.PLAYER1 != null) SoundEffect.PLAYER1.play();
                         } else {
                             if (SoundEffect.PLAYER2 != null) SoundEffect.PLAYER2.play();
                         }
 
-                        // Perbarui status
+                        // Update the player turn and game status
                         if (currentState == State.PLAYING) {
                             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                         } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
@@ -90,24 +79,33 @@ public class GameMain extends JPanel {
 
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
+        statusBar.setBackground(COLOR_BG_STATUS);
+        statusBar.setOpaque(true);
+        statusBar.setPreferredSize(new Dimension(300, 30));
+        statusBar.setHorizontalAlignment(JLabel.LEFT);
+        statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
+
         super.setLayout(new BorderLayout());
         super.add(statusBar, BorderLayout.PAGE_END);
-        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + STATUS_BAR_HEIGHT));
+        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
+        super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
         initGame();
         newGame();
     }
 
-    public void initGame() {
+    private void initGame() {
         board = new Board();
     }
 
-    public void newGame() {
-        board.initGame();
+    private void newGame() {
+        for (int row = 0; row < Board.ROWS; ++row) {
+            for (int col = 0; col < Board.COLS; ++col) {
+                board.cells[row][col].content = Seed.NO_SEED;
+            }
+        }
         currentPlayer = Seed.CROSS;
         currentState = State.PLAYING;
-        statusBar.setText("Player 1's Turn");
-        System.out.println("Game restarted!");
     }
 
     @Override
@@ -127,16 +125,33 @@ public class GameMain extends JPanel {
             g.drawLine(x, 0, x, Board.CANVAS_HEIGHT);
         }
 
+        // Draw player pieces using images (SpongeBob and Patrick)
+        for (int row = 0; row < Board.ROWS; row++) {
+            for (int col = 0; col < Board.COLS; col++) {
+                Seed content = board.cells[row][col].content;
+                if (content != Seed.NO_SEED) {
+                    Image pieceImage = content.getImage();
+                    if (pieceImage != null) {
+                        int x = col * Cell.SIZE;
+                        int y = row * Cell.SIZE;
+                        g.drawImage(pieceImage, x, y, Cell.SIZE, Cell.SIZE, null);
+                    }
+                }
+            }
+        }
+
+        // Update the status message based on the current state of the game
         if (currentState == State.PLAYING) {
-            statusBar.setText((currentPlayer == Seed.CROSS ? "Player 1" : "Player 2") + "'s Turn");
+            statusBar.setText((currentPlayer == Seed.CROSS ? playerName1 : playerName2) + "'s Turn");
         } else if (currentState == State.CROSS_WON) {
-            statusBar.setText("Player 1 Won! Click to restart.");
+            statusBar.setText(playerName1 + " Won! Click to restart.");
         } else if (currentState == State.NOUGHT_WON) {
-            statusBar.setText("Player 2 Won! Click to restart.");
+            statusBar.setText(playerName2 + " Won! Click to restart.");
         } else if (currentState == State.DRAW) {
             statusBar.setText("It's a Draw! Click to restart.");
         }
     }
+
 
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(() -> {

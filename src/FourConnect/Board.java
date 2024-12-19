@@ -19,6 +19,10 @@ public class Board {
     public static final int CANVAS_WIDTH = Cell.SIZE * COLS;
     public static final int CANVAS_HEIGHT = Cell.SIZE * ROWS;
 
+    public static final int GRID_WIDTH = 8;  // Lebar garis grid
+    public static final int GRID_WIDTH_HALF = GRID_WIDTH / 2; // Setengah lebar untuk pemusatan
+    public static final Color COLOR_GRID = Color.LIGHT_GRAY; // Warna untuk garis grid
+
     Cell[][] cells;
 
     public Board() {
