@@ -27,17 +27,21 @@ public class GameMain extends JPanel {
 
     public GameMain() {
         // Input mode and names
-        int mode = JOptionPane.showConfirmDialog(null, "Do you want to play against AI?", "Game Mode", JOptionPane.YES_NO_OPTION);
-        playWithAI = (mode == JOptionPane.YES_OPTION);
+        String[] options = { "Player vs Player", "Player vs AI" };
+        int mode = JOptionPane.showOptionDialog(null, "Choose Game Mode", "Game Mode",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
-        playerName1 = JOptionPane.showInputDialog("Enter player name 1:");
-        playerName1 = (playerName1 == null || playerName1.trim().isEmpty()) ? "Player 1" : playerName1;
-
-        if (!playWithAI) {
+        if (mode == 1) { // Player vs AI
+            playWithAI = true;
+            playerName1 = JOptionPane.showInputDialog("Enter player name:");
+            playerName1 = (playerName1 == null || playerName1.trim().isEmpty()) ? "Player" : playerName1;
+            playerName2 = "AI";
+        } else { // Player vs Player
+            playWithAI = false;
+            playerName1 = JOptionPane.showInputDialog("Enter player name 1:");
+            playerName1 = (playerName1 == null || playerName1.trim().isEmpty()) ? "Player 1" : playerName1;
             playerName2 = JOptionPane.showInputDialog("Enter player name 2:");
             playerName2 = (playerName2 == null || playerName2.trim().isEmpty()) ? "Player 2" : playerName2;
-        } else {
-            playerName2 = "AI";
         }
 
         // Start background music
