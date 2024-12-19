@@ -27,7 +27,25 @@ public class GameMain extends JPanel {
     private Seed currentPlayer;
     private JLabel statusBar;
 
+    // Player names
+    private String playerName1;
+    private String playerName2;
+
     public GameMain() {
+        // Input player's name
+        playerName1 = JOptionPane.showInputDialog("Enter player name 1:");
+        playerName2 = JOptionPane.showInputDialog("Enter player name 2:");
+        if (playerName1 == null || playerName1.trim().isEmpty()) {
+            playerName1 = "Player 1";
+        }
+
+        if (playerName2 == null || playerName2.trim().isEmpty()) {
+            playerName2 = "Player 2";
+        }
+
+        // Start background music
+        SoundEffect.BACKSOUND.loop();
+
         super.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
