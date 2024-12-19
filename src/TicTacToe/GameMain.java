@@ -35,7 +35,7 @@ public class GameMain extends JPanel {
             playWithAI = true;
             playerName1 = JOptionPane.showInputDialog("Enter player name:");
             playerName1 = (playerName1 == null || playerName1.trim().isEmpty()) ? "Player" : playerName1;
-            playerName2 = "AI";
+            playerName2 = "Computer";
         } else { // Player vs Player
             playWithAI = false;
             playerName1 = JOptionPane.showInputDialog("Enter player name 1:");
