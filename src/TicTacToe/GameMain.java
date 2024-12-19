@@ -27,7 +27,7 @@ public class GameMain extends JPanel {
 
     public GameMain() {
         // Input mode and names
-        String[] options = { "Player vs Player", "Player vs AI" };
+        String[] options = { "Player vs Player", "Player vs Computer" };
         int mode = JOptionPane.showOptionDialog(null, "Choose Game Mode", "Game Mode",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
@@ -131,6 +131,7 @@ public class GameMain extends JPanel {
 
                     // Play the AI player's sound after making a move
                     SoundEffect.AI_PLAYER.play(); // Play sound for AI player
+
                     repaint();
                 }
             } catch (InterruptedException e) {
