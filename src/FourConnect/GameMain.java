@@ -111,7 +111,9 @@ public class GameMain extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        setBackground(COLOR_BG);
+        ImageIcon backgroundImage = new ImageIcon("C:\\Users\\user\\IdeaProjects\\Sudoku-Game\\src\\bgTTT.jpg");
+        Image img = backgroundImage.getImage();
+        g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
         board.paint(g, Cell.SIZE);
 
         // Draw grid lines to enhance visibility
