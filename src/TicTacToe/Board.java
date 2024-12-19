@@ -1,6 +1,8 @@
 package TicTacToe;
 
 import java.awt.*;
+import javax.swing.ImageIcon;
+
 /**
  * The Board class models the ROWS-by-COLS game board.
  */
