@@ -73,7 +73,7 @@ public class GameMain extends JPanel {
                         }
                     }
                 } else {
-                    newGame();
+                    newGame();  // Restart the game if it's over
                 }
                 repaint();
             }
@@ -117,6 +117,15 @@ public class GameMain extends JPanel {
     private void updatePlayerState() {
         if (currentState == State.PLAYING) {
             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+        } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
+            // Play the explosion sound when a player wins
+            if (SoundEffect.EXPLOSION != null) {
+                SoundEffect.EXPLOSION.play();
+            }
+        } else if (currentState == State.DRAW) {
+            if (SoundEffect.GAME_OVER != null) {
+                SoundEffect.GAME_OVER.play();
+            }
         }
     }
 
