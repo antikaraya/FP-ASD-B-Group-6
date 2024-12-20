@@ -73,13 +73,7 @@ public class GameMain extends JPanel {
 
         if (result == JOptionPane.OK_OPTION) {
             initialSelectedTime = (String) timeDropdown.getSelectedItem();
-            remainingTime = switch (initialSelectedTime) {
-                case "1 Minute" -> 60;
-                case "2 Minutes" -> 120;
-                case "3 Minutes" -> 180;
-                case "4 Minutes" -> 240;
-                default -> Integer.MAX_VALUE; // Unlimited
-            };
+            remainingTime = calculateTime(initialSelectedTime);
         } else {
             System.exit(0); // Exit if user cancels
         }
@@ -187,7 +181,18 @@ public class GameMain extends JPanel {
         }
         currentPlayer = Seed.CROSS;
         currentState = State.PLAYING;
+        remainingTime = calculateTime(initialSelectedTime); // Reset timer to the initially selected value
         restartTimer();
+    }
+
+    private int calculateTime(String selectedTime) {
+        return switch (selectedTime) {
+            case "1 Minute" -> 60;
+            case "2 Minutes" -> 120;
+            case "3 Minutes" -> 180;
+            case "4 Minutes" -> 240;
+            default -> Integer.MAX_VALUE; // Unlimited
+        };
     }
 
     private void restartTimer() {
@@ -226,13 +231,7 @@ public class GameMain extends JPanel {
         switch (choice) {
             case 0 -> System.exit(0); // Exit
             case 1 -> { // Play Again
-                remainingTime = switch (initialSelectedTime) {
-                    case "1 Minute" -> 60;
-                    case "2 Minutes" -> 120;
-                    case "3 Minutes" -> 180;
-                    case "4 Minutes" -> 240;
-                    default -> Integer.MAX_VALUE;
-                };
+                remainingTime = calculateTime(initialSelectedTime);
                 newGame();
             }
             case 2 -> { // New Game

@@ -38,9 +38,13 @@ public class GameMain extends JPanel {
     private Timer gameTimer;
     private int timeRemaining;
 
+    private String initialTimeSelection;
+    private String[] initialGameOptions;
+
     public GameMain() {
         // Show game mode selection dialog
         String[] options = {"Player vs Player", "Player vs Computer"};
+        initialGameOptions = options;
         int choice = JOptionPane.showOptionDialog(
                 null,
                 "Select Game Mode:",
@@ -75,6 +79,7 @@ public class GameMain extends JPanel {
 
         // Show timer selection dialog
         String[] timeOptions = {"1 minute", "2 minutes", "3 minutes", "4 minutes", "Unlimited"};
+        initialTimeSelection = "Select Game Timer:";
         String selectedTime = (String) JOptionPane.showInputDialog(
                 null,
                 "Select Game Timer:",
@@ -203,8 +208,7 @@ public class GameMain extends JPanel {
                     updateTimerLabel();
                 } else {
                     ((Timer) e.getSource()).stop();
-                    currentState = State.DRAW;
-                    GameNotifier.notifyWinner(currentState, playerName1, playerName2);
+                    onTimeExpired();
                 }
             });
             gameTimer.start();
@@ -275,6 +279,44 @@ public class GameMain extends JPanel {
 
     private boolean isValidMove(int col) {
         return board.cells[0][col].content == Seed.NO_SEED;
+    }
+
+    private void onTimeExpired() {
+        int option = JOptionPane.showOptionDialog(
+                this,
+                "Time is up! What would you like to do?",
+                "Time Up",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                new String[]{"Exit", "Play Again", "New Game"},
+                "Exit"
+        );
+
+        if (option == 0) {
+            System.exit(0); // Exit
+        } else if (option == 1) {
+            newGame(); // Play Again
+        } else if (option == 2) {
+            resetGame(); // New Game
+        }
+    }
+
+    private void resetGame() {
+        new GameMain();
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        frame.dispose();
+        SwingUtilities.invokeLater(() -> {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JFrame newFrame = new JFrame(TITLE);
+            GameMain gamePanel = new GameMain();
+            newFrame.setContentPane(gamePanel);
+            newFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            newFrame.setResizable(false);
+            newFrame.pack();
+            newFrame.setLocationRelativeTo(null);
+            newFrame.setVisible(true);
+        });
     }
 
     @Override
