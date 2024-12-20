@@ -149,10 +149,10 @@ public class GameMain extends JPanel {
                             repaint();
                         }).start();
                     }
-                } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
-                    if (SoundEffect.EXPLOSION != null) SoundEffect.EXPLOSION.play();
-                } else if (currentState == State.DRAW) {
-                    if (SoundEffect.GAME_OVER != null) SoundEffect.GAME_OVER.play();
+                } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON || currentState == State.DRAW) {
+                    GameNotifier.notifyWinner(currentState, playerName1, playerName2);
+                    if (SoundEffect.EXPLOSION != null && currentState != State.DRAW) SoundEffect.EXPLOSION.play();
+                    if (SoundEffect.GAME_OVER != null && currentState == State.DRAW) SoundEffect.GAME_OVER.play();
                 }
             }
         }
@@ -230,4 +230,3 @@ public class GameMain extends JPanel {
         });
     }
 }
-
