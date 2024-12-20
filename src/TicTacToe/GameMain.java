@@ -42,13 +42,16 @@ public class GameMain extends JPanel {
     private int remainingTime;
     private boolean isTimerRunning = false;
 
+    private String initialSelectedTime;
+    private int initialMode;
+
     public GameMain() {
         // Input mode and names
         String[] options = { "Player vs Player", "Player vs Computer" };
-        int mode = JOptionPane.showOptionDialog(null, "Choose Game Mode", "Game Mode",
+        initialMode = JOptionPane.showOptionDialog(null, "Choose Game Mode", "Game Mode",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
-        if (mode == 1) { // Player vs AI
+        if (initialMode == 1) { // Player vs AI
             playWithAI = true;
             playerName1 = JOptionPane.showInputDialog("Enter player name:");
             playerName1 = (playerName1 == null || playerName1.trim().isEmpty()) ? "Player" : playerName1;
@@ -69,8 +72,8 @@ public class GameMain extends JPanel {
         int result = JOptionPane.showConfirmDialog(null, timePanel, "Game Timer", JOptionPane.OK_CANCEL_OPTION);
 
         if (result == JOptionPane.OK_OPTION) {
-            String selectedTime = (String) timeDropdown.getSelectedItem();
-            remainingTime = switch (selectedTime) {
+            initialSelectedTime = (String) timeDropdown.getSelectedItem();
+            remainingTime = switch (initialSelectedTime) {
                 case "1 Minute" -> 60;
                 case "2 Minutes" -> 120;
                 case "3 Minutes" -> 180;
@@ -207,12 +210,44 @@ public class GameMain extends JPanel {
                     SwingUtilities.invokeLater(() -> timerLabel.setText(formatTime(remainingTime)));
                 } else {
                     gameTimer.cancel();
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Time's up! Game over."));
+                    SwingUtilities.invokeLater(() -> showTimeUpDialog());
                     currentState = State.DRAW;
                     repaint();
                 }
             }
         }, 0, 1000);
+    }
+
+    private void showTimeUpDialog() {
+        String[] options = { "Exit", "Play Again", "New Game" };
+        int choice = JOptionPane.showOptionDialog(null, "Time's up! What do you want to do?", "Time's Up",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[1]);
+
+        switch (choice) {
+            case 0 -> System.exit(0); // Exit
+            case 1 -> { // Play Again
+                remainingTime = switch (initialSelectedTime) {
+                    case "1 Minute" -> 60;
+                    case "2 Minutes" -> 120;
+                    case "3 Minutes" -> 180;
+                    case "4 Minutes" -> 240;
+                    default -> Integer.MAX_VALUE;
+                };
+                newGame();
+            }
+            case 2 -> { // New Game
+                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                frame.dispose();
+                javax.swing.SwingUtilities.invokeLater(() -> {
+                    JFrame newFrame = new JFrame(TITLE);
+                    newFrame.setContentPane(new GameMain());
+                    newFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    newFrame.pack();
+                    newFrame.setLocationRelativeTo(null);
+                    newFrame.setVisible(true);
+                });
+            }
+        }
     }
 
     private void stopTimer() {
