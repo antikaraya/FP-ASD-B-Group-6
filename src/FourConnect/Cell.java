@@ -39,15 +39,10 @@ public class Cell {
 
     /** Paint itself on the graphics canvas, given the Graphics context */
     public void paint(Graphics g, int cellSize) {
-        // Draw the Seed if it is not empty
-//        int x1 = col * SIZE + PADDING;
-//        int y1 = row * SIZE + PADDING;
+
         int x = col * cellSize;
         int y = row * cellSize;
 
-//        if (content == Seed.CROSS || content == Seed.NOUGHT) {
-//            g.drawImage(content.getImage(), x1, y1, SEED_SIZE, SEED_SIZE, null);
-//        }
         // Draw based on content
         if (content == Seed.CROSS) {
             g.setColor(Color.RED);
