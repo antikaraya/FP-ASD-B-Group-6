@@ -59,9 +59,11 @@ WelcomePage extends JFrame {
         // Buttons for game selection
         JButton ticTacToeButton = new JButton("Play TicTacToe");
         JButton connectFourButton = new JButton("Play Connect-Four");
+        JButton aboutButton = new JButton("About"); // Buat tombol About
 
         ticTacToeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         connectFourButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        aboutButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Button actions
         ticTacToeButton.addActionListener(new ActionListener() {
@@ -80,11 +82,33 @@ WelcomePage extends JFrame {
             }
         });
 
+        aboutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    About about = new About(); // Membuat jendela baru
+                    // Mendapatkan lokasi jendela utama
+                    JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(aboutButton);
+                    if (mainFrame != null) {
+                        int mainX = mainFrame.getX();
+                        int mainY = mainFrame.getY();
+                        int mainWidth = mainFrame.getWidth();
+                        // Menempatkan jendela baru di samping kanan jendela utama
+                        about.setLocation(mainX + mainWidth + 10, mainY);
+                    }
+                    about.setVisible(true); // Menampilkan jendela baru
+                });
+            }
+        });
+
+
         // Add buttons to content panel
         contentPanel.add(Box.createRigidArea(new Dimension(0, 30))); // Add vertical spacing
         contentPanel.add(ticTacToeButton);
         contentPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Add vertical spacing
         contentPanel.add(connectFourButton);
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Add vertical spacing
+        contentPanel.add(aboutButton);
 
         // Add content panel to the frame
         setContentPane(contentPanel);
