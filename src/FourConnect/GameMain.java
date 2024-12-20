@@ -1,18 +1,9 @@
-/**
- * ES234317-Algorithm and Data Structures
- * Semester Ganjil, 2024/2025
- * Group Capstone Project
- * Group #6
- * 1 - 5026231033 - Ayu Alfia Putri
- * 2 - 5026231034 - Antika Raya
- * 3 - 5026231106 - Nailah Qonitah Firdausa
- */
-
 package FourConnect;
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.Timer;
 import java.util.Random;
 
 public class GameMain extends JPanel {
@@ -29,10 +20,13 @@ public class GameMain extends JPanel {
     private State currentState;
     private Seed currentPlayer;
     private JLabel statusBar;
+    private JLabel timerLabel;
 
     private String playerName1;
     private String playerName2;
     private boolean isPlayer2AI;
+    private Timer gameTimer;
+    private int timeRemaining;
 
     public GameMain() {
         // Show game mode selection dialog
@@ -69,6 +63,39 @@ public class GameMain extends JPanel {
             System.exit(0); // Exit if no choice is made
         }
 
+        // Show timer selection dialog
+        String[] timeOptions = {"1 minute", "2 minutes", "3 minutes", "4 minutes", "Unlimited"};
+        String selectedTime = (String) JOptionPane.showInputDialog(
+                null,
+                "Select Game Timer:",
+                "Timer Selection",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                timeOptions,
+                timeOptions[0]
+        );
+
+        if (selectedTime == null) {
+            System.exit(0); // Exit if no time is selected
+        }
+
+        switch (selectedTime) {
+            case "1 minute":
+                timeRemaining = 60;
+                break;
+            case "2 minutes":
+                timeRemaining = 120;
+                break;
+            case "3 minutes":
+                timeRemaining = 180;
+                break;
+            case "4 minutes":
+                timeRemaining = 240;
+                break;
+            default:
+                timeRemaining = -1; // Unlimited
+        }
+
         // Start background music (if applicable)
         SoundEffect.BACKSOUND.loop();
 
@@ -96,6 +123,13 @@ public class GameMain extends JPanel {
         statusBar.setHorizontalAlignment(JLabel.LEFT);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
+        timerLabel = new JLabel();
+        timerLabel.setFont(FONT_STATUS);
+        timerLabel.setBackground(COLOR_BG_STATUS);
+        timerLabel.setOpaque(true);
+        timerLabel.setPreferredSize(new Dimension(100, 30));
+        timerLabel.setHorizontalAlignment(JLabel.CENTER);
+
         // Create button panel
         JPanel buttonPanel = new JPanel(new BorderLayout());
         JPanel buttonRight = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -122,8 +156,13 @@ public class GameMain extends JPanel {
         southPanel.add(statusBar, BorderLayout.CENTER);
         southPanel.add(buttonPanel, BorderLayout.EAST);
 
+        JPanel northPanel = new JPanel(new BorderLayout());
+        northPanel.add(timerLabel, BorderLayout.CENTER);
+        northPanel.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
+
         super.setLayout(new BorderLayout());
         super.add(southPanel, BorderLayout.SOUTH);
+        super.add(northPanel, BorderLayout.NORTH);
         super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
@@ -143,6 +182,34 @@ public class GameMain extends JPanel {
         }
         currentPlayer = Seed.CROSS;
         currentState = State.PLAYING;
+
+        if (gameTimer != null) {
+            gameTimer.stop();
+        }
+        if (timeRemaining > 0) {
+            gameTimer = new Timer(1000, e -> {
+                if (timeRemaining > 0) {
+                    timeRemaining--;
+                    updateTimerLabel();
+                } else {
+                    ((Timer) e.getSource()).stop();
+                    currentState = State.DRAW;
+                    GameNotifier.notifyWinner(currentState, playerName1, playerName2);
+                }
+            });
+            gameTimer.start();
+        }
+        updateTimerLabel();
+    }
+
+    private void updateTimerLabel() {
+        if (timeRemaining < 0) {
+            timerLabel.setText("Unlimited");
+        } else {
+            int minutes = timeRemaining / 60;
+            int seconds = timeRemaining % 60;
+            timerLabel.setText(String.format("%02d:%02d", minutes, seconds));
+        }
     }
 
     private void playerMove(int col) {
@@ -176,6 +243,7 @@ public class GameMain extends JPanel {
                         }).start();
                     }
                 } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON || currentState == State.DRAW) {
+                    if (gameTimer != null) gameTimer.stop();
                     GameNotifier.notifyWinner(currentState, playerName1, playerName2);
                     if (SoundEffect.EXPLOSION != null && currentState != State.DRAW) SoundEffect.EXPLOSION.play();
                     if (SoundEffect.GAME_OVER != null && currentState == State.DRAW) SoundEffect.GAME_OVER.play();
