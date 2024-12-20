@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /**
  * ES234317-Algorithm and Data Structures
  * Semester Ganjil, 2024/2025
@@ -10,7 +8,6 @@
  * 3 - 5026231106 - Nailah Qonitah Firdausa
  */
 
->>>>>>> origin/master
 package TicTacToe;
 
 import javax.swing.*;
@@ -27,8 +24,4 @@ public class GameNotifier {
             }
         });
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/master
