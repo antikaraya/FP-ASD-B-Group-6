@@ -13,6 +13,8 @@ package TicTacToe;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class GameMain extends JPanel {
     private static final long serialVersionUID = 1L;
@@ -28,12 +30,17 @@ public class GameMain extends JPanel {
     private State currentState;
     private Seed currentPlayer;
     private JLabel statusBar;
+    private JLabel timerLabel;
 
     private String playerName1;
     private String playerName2;
 
     private AIPlayer aiPlayer;
     private boolean playWithAI = false;
+
+    private Timer gameTimer;
+    private int remainingTime;
+    private boolean isTimerRunning = false;
 
     public GameMain() {
         // Input mode and names
@@ -52,6 +59,26 @@ public class GameMain extends JPanel {
             playerName1 = (playerName1 == null || playerName1.trim().isEmpty()) ? "Player 1" : playerName1;
             playerName2 = JOptionPane.showInputDialog("Enter player name 2:");
             playerName2 = (playerName2 == null || playerName2.trim().isEmpty()) ? "Player 2" : playerName2;
+        }
+
+        // Select timer duration using dropdown
+        JComboBox<String> timeDropdown = new JComboBox<>(new String[]{ "1 Minute", "2 Minutes", "3 Minutes", "4 Minutes", "Unlimited" });
+        JPanel timePanel = new JPanel();
+        timePanel.add(new JLabel("Select Game Timer:"));
+        timePanel.add(timeDropdown);
+        int result = JOptionPane.showConfirmDialog(null, timePanel, "Game Timer", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String selectedTime = (String) timeDropdown.getSelectedItem();
+            remainingTime = switch (selectedTime) {
+                case "1 Minute" -> 60;
+                case "2 Minutes" -> 120;
+                case "3 Minutes" -> 180;
+                case "4 Minutes" -> 240;
+                default -> Integer.MAX_VALUE; // Unlimited
+            };
+        } else {
+            System.exit(0); // Exit if user cancels
         }
 
         // Start background music
@@ -89,6 +116,14 @@ public class GameMain extends JPanel {
             }
         });
 
+        // Timer label setup
+        timerLabel = new JLabel(formatTime(remainingTime));
+        timerLabel.setFont(FONT_STATUS);
+        timerLabel.setHorizontalAlignment(JLabel.CENTER);
+        timerLabel.setOpaque(true);
+        timerLabel.setBackground(COLOR_BG_STATUS);
+        timerLabel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 30));
+
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
         statusBar.setBackground(COLOR_BG_STATUS);
@@ -124,8 +159,9 @@ public class GameMain extends JPanel {
         southPanel.add(buttonPanel, BorderLayout.EAST);
 
         super.setLayout(new BorderLayout());
+        super.add(timerLabel, BorderLayout.NORTH);
         super.add(southPanel, BorderLayout.SOUTH);
-        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
+        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 60));
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
         initGame();
@@ -148,16 +184,57 @@ public class GameMain extends JPanel {
         }
         currentPlayer = Seed.CROSS;
         currentState = State.PLAYING;
+        restartTimer();
+    }
+
+    private void restartTimer() {
+        if (gameTimer != null) {
+            gameTimer.cancel();
+        }
+        startTimer();
+    }
+
+    private void startTimer() {
+        if (remainingTime == Integer.MAX_VALUE) return; // Unlimited mode, no timer
+
+        gameTimer = new Timer();
+        isTimerRunning = true;
+        gameTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (remainingTime > 0) {
+                    remainingTime--;
+                    SwingUtilities.invokeLater(() -> timerLabel.setText(formatTime(remainingTime)));
+                } else {
+                    gameTimer.cancel();
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, "Time's up! Game over."));
+                    currentState = State.DRAW;
+                    repaint();
+                }
+            }
+        }, 0, 1000);
+    }
+
+    private void stopTimer() {
+        if (gameTimer != null) {
+            gameTimer.cancel();
+        }
+        isTimerRunning = false;
+    }
+
+    private String formatTime(int timeInSeconds) {
+        int minutes = timeInSeconds / 60;
+        int seconds = timeInSeconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
     }
 
     private void updatePlayerState() {
         if (currentState == State.PLAYING) {
             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
         } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON || currentState == State.DRAW) {
-            // Notify the winner or draw
+            stopTimer();
             GameNotifier.notifyWinner(currentState, playerName1, playerName2);
 
-            // Play the explosion sound when a player wins
             if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
                 if (SoundEffect.EXPLOSION != null) {
                     SoundEffect.EXPLOSION.play();
@@ -179,7 +256,6 @@ public class GameMain extends JPanel {
                     currentState = board.stepGame(currentPlayer, move[0], move[1]);
                     updatePlayerState();
 
-                    // Play the AI player's sound after making a move
                     SoundEffect.AI_PLAYER.play(); // Play sound for AI player
 
                     repaint();
@@ -195,9 +271,21 @@ public class GameMain extends JPanel {
         super.paintComponent(g);
         ImageIcon backgroundImage = new ImageIcon("src/bgTTT.jpg");
         Image img = backgroundImage.getImage();
+
+        int boardWidth = Board.CANVAS_WIDTH;
+        int boardHeight = Board.CANVAS_HEIGHT;
+
+        int xOffset = (getWidth() - boardWidth) / 2;
+        int yOffset = (getHeight() - boardHeight) / 2;
+
         g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
 
-        board.paint(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.translate(xOffset, yOffset);
+
+        board.paint(g2d);
+
+        g2d.translate(-xOffset, -yOffset);
 
         if (currentState == State.PLAYING) {
             statusBar.setForeground(Color.BLACK);
