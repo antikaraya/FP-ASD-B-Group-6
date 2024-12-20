@@ -86,30 +86,35 @@ public class GameMain extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (currentState == State.PLAYING) {
-                    int mouseX = e.getX();
-                    int mouseY = e.getY();
-                    int row = mouseY / Cell.SIZE;
-                    int col = mouseX / Cell.SIZE;
+                    // Check if it's the current player's turn
+                    if ((currentPlayer == Seed.CROSS && currentState == State.PLAYING) ||
+                            (currentPlayer == Seed.NOUGHT && currentState == State.PLAYING)) {
+                        int mouseX = e.getX();
+                        int mouseY = e.getY();
+                        int row = mouseY / Cell.SIZE;
+                        int col = mouseX / Cell.SIZE;
 
-                    if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
-                            && board.cells[row][col].content == Seed.NO_SEED) {
-                        // Play sound for the current player move BEFORE updating state
-                        if (currentPlayer == Seed.CROSS) {
-                            SoundEffect.PLAYER1.play(); // Player 1 sound (Cross)
-                        } else {
-                            SoundEffect.PLAYER2.play(); // Player 2 sound (Nought)
-                        }
+                        if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
+                                && board.cells[row][col].content == Seed.NO_SEED) {
+                            currentState = board.stepGame(currentPlayer, row, col);
+                            repaint();
+                            updatePlayerState();
 
-                        currentState = board.stepGame(currentPlayer, row, col);
-                        updatePlayerState();
+                            // Play sound for the current player move
+                            if (currentPlayer == Seed.NOUGHT) {
+                                SoundEffect.PLAYER1.play();  // Player 1 sound (Cross)
+                            } else {
+                                SoundEffect.PLAYER2.play();  // Player 2 sound (Nought)
+                            }
 
-                        // Handle AI move if playing with AI
-                        if (playWithAI && currentState == State.PLAYING && currentPlayer == Seed.NOUGHT) {
-                            handleAIMove();
+                            // Handle AI move if playing with AI
+                            if (playWithAI && currentState == State.PLAYING && currentPlayer == Seed.NOUGHT) {
+                                handleAIMove();
+                            }
                         }
                     }
                 } else {
-                    newGame(); // Restart the game if it's over
+                    newGame();  // Restart the game if it's over
                 }
                 repaint();
             }
@@ -200,18 +205,10 @@ public class GameMain extends JPanel {
             // Only allow the next player to make a move
             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
             secondsLeft = turnTimeLimit; // Reset turn timer for the new player
-        } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
-            // Play the explosion sound when a player wins
-            if (SoundEffect.EXPLOSION != null) {
-                SoundEffect.EXPLOSION.play();
-            }
-        } else if (currentState == State.DRAW) {
-            if (SoundEffect.GAME_OVER != null) {
-                SoundEffect.GAME_OVER.play();
-            }
+        } else {
+            GameNotifier.notifyWinner(currentState, playerName1, playerName2);
         }
     }
-
 
     private void handleAIMove() {
         new Thread(() -> {
@@ -220,12 +217,11 @@ public class GameMain extends JPanel {
                 if (currentState == State.PLAYING) {
                     int[] move = aiPlayer.move();
                     currentState = board.stepGame(currentPlayer, move[0], move[1]);
-                    updatePlayerState();
-
+                    repaint();
                     // Play the AI player's sound after making a move
                     SoundEffect.AI_PLAYER.play(); // Play sound for AI player
+                    updatePlayerState();
 
-                    repaint();
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
