@@ -1,3 +1,13 @@
+/**
+ * ES234317-Algorithm and Data Structures
+ * Semester Ganjil, 2024/2025
+ * Group Capstone Project
+ * Group #6
+ * 1 - 5026231033 - Ayu Alfia Putri
+ * 2 - 5026231034 - Antika Raya
+ * 3 - 5026231106 - Nailah Qonitah Firdausa
+ */
+
 package FourConnect;
 
 import java.awt.*;
@@ -7,7 +17,7 @@ import javax.swing.*;
 public class GameMain extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    public static final String TITLE = "Connect Four";
+    public static final String TITLE = "Connect-Four";
     public static final Color COLOR_BG = Color.WHITE;
     public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
     public static final Color COLOR_PLAYER1 = new Color(239, 105, 80);  // Red #EF6950
