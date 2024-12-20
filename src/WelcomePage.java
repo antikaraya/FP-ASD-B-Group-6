@@ -13,7 +13,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class WelcomePage extends JFrame {
+public class
+WelcomePage extends JFrame {
     private Image backgroundImage; // Deklarasi variabel gambar
 
     public WelcomePage() {

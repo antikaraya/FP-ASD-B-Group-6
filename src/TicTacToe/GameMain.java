@@ -1,13 +1,3 @@
-/**
- * ES234317-Algorithm and Data Structures
- * Semester Ganjil, 2024/2025
- * Group Capstone Project
- * Group #6
- * 1 - 5026231033 - Ayu Alfia Putri
- * 2 - 5026231034 - Antika Raya
- * 3 - 5026231106 - Nailah Qonitah Firdausa
- */
-
 package TicTacToe;
 
 import java.awt.*;
@@ -28,6 +18,8 @@ public class GameMain extends JPanel {
     private State currentState;
     private Seed currentPlayer;
     private JLabel statusBar;
+    private JLabel player1TimeLabel;
+    private JLabel player2TimeLabel;
 
     private String playerName1;
     private String playerName2;
@@ -35,12 +27,35 @@ public class GameMain extends JPanel {
     private AIPlayer aiPlayer;
     private boolean playWithAI = false;
 
+    // Time-related variables
+    private int turnTimeLimit; // Time per turn in seconds
+    private int player1TimeLeft; // Player 1 total time in seconds
+    private int player2TimeLeft; // Player 2 total time in seconds
+    private Timer turnTimer; // Timer for turn countdown
+    private Timer gameTimer; // Timer for total game time
+    private int secondsLeft; // Seconds remaining in current turn
+
     public GameMain() {
         // Input mode and names
         String[] options = { "Player vs Player", "Player vs Computer" };
         int mode = JOptionPane.showOptionDialog(null, "Choose Game Mode", "Game Mode",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
+        // Add dialog to select turn time and player time
+        String[] turnTimes = { "10s", "20s", "30s", "40s", "Unlimited" };
+        String selectedTurnTime = (String) JOptionPane.showInputDialog(null, "Select time per turn:",
+                "Time Per Turn", JOptionPane.QUESTION_MESSAGE, null, turnTimes, turnTimes[0]);
+        turnTimeLimit = getTimeInSeconds(selectedTurnTime);  // Convert to seconds
+
+        String[] playerTimes = { "1m", "2m", "3m", "4m", "Unlimited" };
+        String selectedPlayerTime = (String) JOptionPane.showInputDialog(null, "Select minutes per player:",
+                "Minutes Per Player", JOptionPane.QUESTION_MESSAGE, null, playerTimes, playerTimes[0]);
+        int totalPlayerTime = getTimeInMinutes(selectedPlayerTime);  // Convert to minutes
+
+        player1TimeLeft = totalPlayerTime * 60; // Convert to seconds
+        player2TimeLeft = totalPlayerTime * 60; // Convert to seconds
+
+        // Input player names
         if (mode == 1) { // Player vs AI
             playWithAI = true;
             playerName1 = JOptionPane.showInputDialog("Enter player name:");
@@ -61,25 +76,30 @@ public class GameMain extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (currentState == State.PLAYING) {
-                    int mouseX = e.getX();
-                    int mouseY = e.getY();
-                    int row = mouseY / Cell.SIZE;
-                    int col = mouseX / Cell.SIZE;
+                    // Check if it's the current player's turn
+                    if ((currentPlayer == Seed.CROSS && currentState == State.PLAYING) ||
+                            (currentPlayer == Seed.NOUGHT && currentState == State.PLAYING)) {
+                        int mouseX = e.getX();
+                        int mouseY = e.getY();
+                        int row = mouseY / Cell.SIZE;
+                        int col = mouseX / Cell.SIZE;
 
-                    if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
-                            && board.cells[row][col].content == Seed.NO_SEED) {
-                        currentState = board.stepGame(currentPlayer, row, col);
-                        updatePlayerState();
+                        if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
+                                && board.cells[row][col].content == Seed.NO_SEED) {
+                            currentState = board.stepGame(currentPlayer, row, col);
+                            updatePlayerState();
 
-                        // Play sound for the current player move
-                        if (currentPlayer == Seed.NOUGHT) {
-                            SoundEffect.PLAYER1.play();  // Play sound for Player 1 (cross)
-                        } else {
-                            SoundEffect.PLAYER2.play();  // Play sound for Player 2 (nought)
-                        }
+                            // Play sound for the current player move
+                            if (currentPlayer == Seed.NOUGHT) {
+                                SoundEffect.PLAYER1.play();  // Player 1 sound (Cross)
+                            } else {
+                                SoundEffect.PLAYER2.play();  // Player 2 sound (Nought)
+                            }
 
-                        if (playWithAI && currentState == State.PLAYING && currentPlayer == Seed.NOUGHT) {
-                            handleAIMove();
+                            // Handle AI move if playing with AI
+                            if (playWithAI && currentState == State.PLAYING && currentPlayer == Seed.NOUGHT) {
+                                handleAIMove();
+                            }
                         }
                     }
                 } else {
@@ -89,6 +109,7 @@ public class GameMain extends JPanel {
             }
         });
 
+
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
         statusBar.setBackground(COLOR_BG_STATUS);
@@ -97,7 +118,28 @@ public class GameMain extends JPanel {
         statusBar.setHorizontalAlignment(JLabel.LEFT);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
+        // Time labels for players
+        player1TimeLabel = new JLabel();
+        player1TimeLabel.setFont(FONT_STATUS);
+        player1TimeLabel.setPreferredSize(new Dimension(150, 30));
+        player1TimeLabel.setHorizontalAlignment(JLabel.CENTER);
+        player1TimeLabel.setBackground(COLOR_BG_STATUS);
+        player1TimeLabel.setOpaque(true);
+
+        player2TimeLabel = new JLabel();
+        player2TimeLabel.setFont(FONT_STATUS);
+        player2TimeLabel.setPreferredSize(new Dimension(150, 30));
+        player2TimeLabel.setHorizontalAlignment(JLabel.CENTER);
+        player2TimeLabel.setBackground(COLOR_BG_STATUS);
+        player2TimeLabel.setOpaque(true);
+
+        JPanel timePanel = new JPanel();
+        timePanel.setLayout(new GridLayout(1, 2));
+        timePanel.add(player1TimeLabel);
+        timePanel.add(player2TimeLabel);
+
         super.setLayout(new BorderLayout());
+        super.add(timePanel, BorderLayout.NORTH);
         super.add(statusBar, BorderLayout.PAGE_END);
         super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
@@ -112,6 +154,27 @@ public class GameMain extends JPanel {
             aiPlayer = new AIPlayerMinimax(board);
             aiPlayer.setSeed(Seed.NOUGHT);
         }
+
+        // Initialize turn timer
+        turnTimer = new Timer(1000, e -> {
+            if (secondsLeft > 0) {
+                secondsLeft--;
+                updateTimeDisplay();
+            } else {
+                changeTurn(); // If time is up, switch turn
+            }
+        });
+
+        // Initialize game timer for tracking total time per player
+        gameTimer = new Timer(1000, e -> {
+            if (currentPlayer == Seed.CROSS && player1TimeLeft > 0) {
+                player1TimeLeft--;
+            } else if (currentPlayer == Seed.NOUGHT && player2TimeLeft > 0) {
+                player2TimeLeft--;
+            }
+            updateTimeDisplay();
+        });
+        gameTimer.start();
     }
 
     private void newGame() {
@@ -122,11 +185,15 @@ public class GameMain extends JPanel {
         }
         currentPlayer = Seed.CROSS;
         currentState = State.PLAYING;
+        secondsLeft = turnTimeLimit; // Reset turn timer
+        turnTimer.start(); // Start the timer for turn time
     }
 
     private void updatePlayerState() {
         if (currentState == State.PLAYING) {
+            // Only allow the next player to make a move
             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+            secondsLeft = turnTimeLimit; // Reset turn timer for the new player
         } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
             // Play the explosion sound when a player wins
             if (SoundEffect.EXPLOSION != null) {
@@ -138,6 +205,7 @@ public class GameMain extends JPanel {
             }
         }
     }
+
 
     private void handleAIMove() {
         new Thread(() -> {
@@ -157,6 +225,59 @@ public class GameMain extends JPanel {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    private void updateTimeDisplay() {
+        // Update the time labels for both players
+        player1TimeLabel.setText(String.format("%s: %02d:%02d", playerName1, player1TimeLeft / 60, player1TimeLeft % 60));
+        player2TimeLabel.setText(String.format("%s: %02d:%02d", playerName2, player2TimeLeft / 60, player2TimeLeft % 60));
+
+        // Update turn timer for current player
+        if (secondsLeft >= 0) {
+            statusBar.setText(String.format("%s's Turn: %02d:%02d",
+                    currentPlayer == Seed.CROSS ? playerName1 : playerName2,
+                    secondsLeft / 60, secondsLeft % 60));
+        }
+    }
+
+    private void changeTurn() {
+        currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+        secondsLeft = turnTimeLimit; // Reset turn timer for the next player
+        turnTimer.restart(); // Restart the turn timer for the new player
+    }
+
+    private int getTimeInSeconds(String selectedTime) {
+        switch (selectedTime) {
+            case "10s":
+                return 10;
+            case "20s":
+                return 20;
+            case "30s":
+                return 30;
+            case "40s":
+                return 40;
+            case "Unlimited":
+                return Integer.MAX_VALUE;
+            default:
+                return 0;
+        }
+    }
+
+    private int getTimeInMinutes(String selectedTime) {
+        switch (selectedTime) {
+            case "1m":
+                return 1;
+            case "2m":
+                return 2;
+            case "3m":
+                return 3;
+            case "4m":
+                return 4;
+            case "Unlimited":
+                return Integer.MAX_VALUE;
+            default:
+                return 0;
+        }
     }
 
     @Override
