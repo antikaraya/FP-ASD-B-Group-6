@@ -13,6 +13,7 @@ package FourConnect;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.Random;
 
 public class GameMain extends JPanel {
     private static final long serialVersionUID = 1L;
@@ -31,16 +32,41 @@ public class GameMain extends JPanel {
 
     private String playerName1;
     private String playerName2;
+    private boolean isPlayer2AI;
 
     public GameMain() {
-        // Input player names
-        playerName1 = JOptionPane.showInputDialog("Enter player name 1:");
-        playerName2 = JOptionPane.showInputDialog("Enter player name 2:");
-        if (playerName1 == null || playerName1.trim().isEmpty()) {
-            playerName1 = "Player 1";
-        }
-        if (playerName2 == null || playerName2.trim().isEmpty()) {
-            playerName2 = "Player 2";
+        // Show game mode selection dialog
+        String[] options = {"Player vs Player", "Player vs Computer"};
+        int choice = JOptionPane.showOptionDialog(
+                null,
+                "Select Game Mode:",
+                "Game Mode",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        if (choice == 0) {
+            isPlayer2AI = false;
+            playerName1 = JOptionPane.showInputDialog("Enter player name 1:");
+            playerName2 = JOptionPane.showInputDialog("Enter player name 2:");
+            if (playerName1 == null || playerName1.trim().isEmpty()) {
+                playerName1 = "Player 1";
+            }
+            if (playerName2 == null || playerName2.trim().isEmpty()) {
+                playerName2 = "Player 2";
+            }
+        } else if (choice == 1) {
+            isPlayer2AI = true;
+            playerName1 = JOptionPane.showInputDialog("Enter your name:");
+            playerName2 = "AI";
+            if (playerName1 == null || playerName1.trim().isEmpty()) {
+                playerName1 = "Player 1";
+            }
+        } else {
+            System.exit(0); // Exit if no choice is made
         }
 
         // Start background music (if applicable)
@@ -49,36 +75,11 @@ public class GameMain extends JPanel {
         super.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int mouseX = e.getX();
-                int col = mouseX / Cell.SIZE;
-
-                if (col >= 0 && col < Board.COLS) {
-                    int row = -1;
-                    for (int r = Board.ROWS - 1; r >= 0; r--) {
-                        if (board.cells[r][col].content == Seed.NO_SEED) {
-                            row = r;
-                            break;
-                        }
-                    }
-
-                    if (row != -1 && currentState == State.PLAYING) {
-                        currentState = board.stepGame(currentPlayer, row, col);
-
-                        // Play sound effects based on player
-                        if (currentPlayer == Seed.CROSS) {
-                            if (SoundEffect.PLAYER1 != null) SoundEffect.PLAYER1.play();
-                        } else {
-                            if (SoundEffect.PLAYER2 != null) SoundEffect.PLAYER2.play();
-                        }
-
-                        // Update the player turn and game status
-                        if (currentState == State.PLAYING) {
-                            currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
-                        } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
-                            if (SoundEffect.EXPLOSION != null) SoundEffect.EXPLOSION.play();
-                        } else if (currentState == State.DRAW) {
-                            if (SoundEffect.GAME_OVER != null) SoundEffect.GAME_OVER.play();
-                        }
+                if (currentState == State.PLAYING) {
+                    if (currentPlayer == Seed.CROSS || !isPlayer2AI) {
+                        int mouseX = e.getX();
+                        int col = mouseX / Cell.SIZE;
+                        playerMove(col);
                     }
                 } else {
                     newGame();
@@ -118,15 +119,68 @@ public class GameMain extends JPanel {
         currentState = State.PLAYING;
     }
 
+    private void playerMove(int col) {
+        if (col >= 0 && col < Board.COLS) {
+            int row = -1;
+            for (int r = Board.ROWS - 1; r >= 0; r--) {
+                if (board.cells[r][col].content == Seed.NO_SEED) {
+                    row = r;
+                    break;
+                }
+            }
+
+            if (row != -1) {
+                currentState = board.stepGame(currentPlayer, row, col);
+
+                if (currentPlayer == Seed.CROSS) {
+                    if (SoundEffect.PLAYER1 != null) SoundEffect.PLAYER1.play();
+                } else {
+                    if (SoundEffect.PLAYER2 != null) SoundEffect.PLAYER2.play();
+                }
+
+                if (currentState == State.PLAYING) {
+                    currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+
+                    // Trigger AI move if applicable
+                    if (isPlayer2AI && currentPlayer == Seed.NOUGHT) {
+                        new Timer(500, e -> {
+                            ((Timer) e.getSource()).stop();
+                            aiMove();
+                            repaint();
+                        }).start();
+                    }
+                } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
+                    if (SoundEffect.EXPLOSION != null) SoundEffect.EXPLOSION.play();
+                } else if (currentState == State.DRAW) {
+                    if (SoundEffect.GAME_OVER != null) SoundEffect.GAME_OVER.play();
+                }
+            }
+        }
+    }
+
+    private void aiMove() {
+        Random random = new Random();
+        int col;
+
+        do {
+            col = random.nextInt(Board.COLS);
+        } while (!isValidMove(col));
+
+        playerMove(col);
+    }
+
+    private boolean isValidMove(int col) {
+        return board.cells[0][col].content == Seed.NO_SEED;
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        ImageIcon backgroundImage = new ImageIcon("src\bgTTT.jpg");
+        ImageIcon backgroundImage = new ImageIcon("src/bgTTT.jpg");
         Image img = backgroundImage.getImage();
         g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
         board.paint(g, Cell.SIZE);
 
-        // Draw grid lines to enhance visibility
         g.setColor(Color.BLACK);
         for (int row = 1; row < Board.ROWS; row++) {
             int y = row * Cell.SIZE;
@@ -137,7 +191,6 @@ public class GameMain extends JPanel {
             g.drawLine(x, 0, x, Board.CANVAS_HEIGHT);
         }
 
-        // Draw player pieces using images (SpongeBob and Patrick)
         for (int row = 0; row < Board.ROWS; row++) {
             for (int col = 0; col < Board.COLS; col++) {
                 Seed content = board.cells[row][col].content;
@@ -152,7 +205,6 @@ public class GameMain extends JPanel {
             }
         }
 
-        // Update the status message based on the current state of the game
         if (currentState == State.PLAYING) {
             statusBar.setText((currentPlayer == Seed.CROSS ? playerName1 : playerName2) + "'s Turn");
         } else if (currentState == State.CROSS_WON) {
@@ -163,7 +215,6 @@ public class GameMain extends JPanel {
             statusBar.setText("It's a Draw! Click to restart.");
         }
     }
-
 
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(() -> {
@@ -179,3 +230,4 @@ public class GameMain extends JPanel {
         });
     }
 }
+
