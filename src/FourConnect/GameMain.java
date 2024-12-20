@@ -123,7 +123,6 @@ public class GameMain extends JPanel {
         southPanel.add(buttonPanel, BorderLayout.EAST);
 
         super.setLayout(new BorderLayout());
-//        super.add(statusBar, BorderLayout.PAGE_END);
         super.add(southPanel, BorderLayout.SOUTH);
         super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));

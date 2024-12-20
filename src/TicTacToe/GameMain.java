@@ -97,8 +97,34 @@ public class GameMain extends JPanel {
         statusBar.setHorizontalAlignment(JLabel.LEFT);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
+        // Create button panel
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        JPanel buttonRight = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnReset = new JButton("Reset Game");
+        JButton btnExit = new JButton("Exit");
+
+        // Add action listeners to buttons
+        btnReset.addActionListener(e -> {
+            newGame();
+            repaint();
+        });
+
+        btnExit.addActionListener(e -> System.exit(0));
+
+        // Add buttons to the panel
+        buttonRight.add(btnReset);
+        buttonRight.add(btnExit);
+
+        // Style button panel
+        buttonPanel.add(buttonRight, BorderLayout.EAST);
+
+        // Combine statusBar and buttonPanel into southPanel
+        JPanel southPanel = new JPanel(new BorderLayout());
+        southPanel.add(statusBar, BorderLayout.CENTER);
+        southPanel.add(buttonPanel, BorderLayout.EAST);
+
         super.setLayout(new BorderLayout());
-        super.add(statusBar, BorderLayout.PAGE_END);
+        super.add(southPanel, BorderLayout.SOUTH);
         super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
