@@ -87,6 +87,7 @@ public class GameMain extends JPanel {
                         if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
                                 && board.cells[row][col].content == Seed.NO_SEED) {
                             currentState = board.stepGame(currentPlayer, row, col);
+                            repaint();
                             updatePlayerState();
 
                             // Play sound for the current player move
@@ -199,13 +200,14 @@ public class GameMain extends JPanel {
             if (SoundEffect.EXPLOSION != null) {
                 SoundEffect.EXPLOSION.play();
             }
+            displayWinner();
         } else if (currentState == State.DRAW) {
             if (SoundEffect.GAME_OVER != null) {
                 SoundEffect.GAME_OVER.play();
             }
+            JOptionPane.showMessageDialog(this, "It's a Draw!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
         }
     }
-
 
     private void handleAIMove() {
         new Thread(() -> {
@@ -214,17 +216,21 @@ public class GameMain extends JPanel {
                 if (currentState == State.PLAYING) {
                     int[] move = aiPlayer.move();
                     currentState = board.stepGame(currentPlayer, move[0], move[1]);
-                    updatePlayerState();
-
+                    repaint();
                     // Play the AI player's sound after making a move
                     SoundEffect.AI_PLAYER.play(); // Play sound for AI player
+                    updatePlayerState();
 
-                    repaint();
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    private void displayWinner() {
+        String winner = (currentState == State.CROSS_WON) ? playerName1 : playerName2;
+        JOptionPane.showMessageDialog(this, winner + " has won the game!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void updateTimeDisplay() {
