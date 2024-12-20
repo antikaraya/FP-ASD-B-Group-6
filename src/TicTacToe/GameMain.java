@@ -195,17 +195,8 @@ public class GameMain extends JPanel {
             // Only allow the next player to make a move
             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
             secondsLeft = turnTimeLimit; // Reset turn timer for the new player
-        } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
-            // Play the explosion sound when a player wins
-            if (SoundEffect.EXPLOSION != null) {
-                SoundEffect.EXPLOSION.play();
-            }
-            displayWinner();
-        } else if (currentState == State.DRAW) {
-            if (SoundEffect.GAME_OVER != null) {
-                SoundEffect.GAME_OVER.play();
-            }
-            JOptionPane.showMessageDialog(this, "It's a Draw!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            GameNotifier.notifyWinner(currentState, playerName1, playerName2);
         }
     }
 
@@ -226,11 +217,6 @@ public class GameMain extends JPanel {
                 e.printStackTrace();
             }
         }).start();
-    }
-
-    private void displayWinner() {
-        String winner = (currentState == State.CROSS_WON) ? playerName1 : playerName2;
-        JOptionPane.showMessageDialog(this, winner + " has won the game!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void updateTimeDisplay() {
